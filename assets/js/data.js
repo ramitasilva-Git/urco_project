@@ -11,7 +11,7 @@ export const STORE = {
   tagline: "NOBLEZA DE ACERO",
   subtitle: "Desde la cocina hasta el monte, el filo que te acompaña siempre",
   currency: "AR$",
-  whatsapp: "5491100000000",
+  whatsapp: "5491169776616",
   instagram: "https://instagram.com/",
 };
 
