@@ -1,11 +1,10 @@
 // ============================================================================
 //  URCO — Configuración de Supabase
-//  Pegá acá los datos de tu proyecto (Supabase → Project Settings → API).
+//  Datos del proyecto (Supabase → Project Settings → API Keys).
 //
-//  - La "anon key" es PÚBLICA y es seguro exponerla: la seguridad la dan las
-//    políticas RLS del servidor (los usuarios comunes no pueden editar).
-//  - Si dejás los valores como están ("TU_..."), el sitio funciona en modo
-//    demo con el catálogo estático de assets/js/data.js.
+//  - La "anon / publishable key" es PÚBLICA y es seguro exponerla: la seguridad
+//    la dan las políticas RLS del servidor (los usuarios comunes no pueden editar).
+//  - Si volvés a poner "TU_...", el sitio usa el catálogo estático de demo.
 // ============================================================================
-export const SUPABASE_URL = "TU_SUPABASE_URL";
-export const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY";
+export const SUPABASE_URL = "https://jdaissmvsnipnrjcrtku.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_JCpuUBzyf8haHJN5sj5Oqw_Q032aCu_";
