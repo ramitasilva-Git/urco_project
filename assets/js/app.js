@@ -1,8 +1,10 @@
 // ============================================================================
-//  URCO — Lógica de la tienda
-//  Render + búsqueda + carrito (con checkout por WhatsApp) + modal
+//  URCO — Lógica de la tienda (público)
+//  Render + búsqueda + carrito (checkout por WhatsApp) + modal.
+//  Los productos se cargan desde Supabase (o el catálogo estático de demo).
 // ============================================================================
-import { STORE, CATEGORIES, FEATURES, PRODUCTS } from "./data.js";
+import { STORE, CATEGORIES, FEATURES } from "./data.js";
+import { loadProducts, PLACEHOLDER } from "./store.js";
 
 /* ---------- Helpers ---------- */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -10,6 +12,7 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 const fmt = (n) => `${STORE.currency}${Number(n).toLocaleString("es-AR")}`;
 const priceOf = (p) => (p.discountedPrice != null && p.discountedPrice < p.price ? p.discountedPrice : p.price);
 const isOff = (p) => p.discountedPrice != null && p.discountedPrice < p.price;
+const imgOf = (p, i = 0) => (p.images && p.images[i]) || PLACEHOLDER;
 const el = (html) => {
   const t = document.createElement("template");
   t.innerHTML = html.trim();
@@ -17,6 +20,10 @@ const el = (html) => {
 };
 const waLink = (text) => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
 const catName = (slug) => (CATEGORIES.find((c) => c.slug === slug) || {}).name || "";
+
+/* ---------- Catálogo (cargado async) ---------- */
+let CATALOG = [];
+let BY_SLUG = new Map();
 
 /* ---------- Iconos (SVG) ---------- */
 const ICONS = {
@@ -32,12 +39,10 @@ const ICONS = {
 /* ---------- Estado carrito ---------- */
 const CART_KEY = "urco_cart";
 let cart = load();
-function load() {
-  try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; } catch { return {}; }
-}
+function load() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; } catch { return {}; } }
 function save() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 
-/* ---------- Enlaces de contacto ---------- */
+/* ---------- Contacto ---------- */
 function wireContact() {
   $$("[data-ig]").forEach((a) => (a.href = STORE.instagram));
   const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
@@ -79,9 +84,9 @@ function renderCatalog(filter = "") {
   let total = 0;
 
   CATEGORIES.forEach((cat) => {
-    const items = PRODUCTS.filter(
+    const items = CATALOG.filter(
       (p) => p.category === cat.slug &&
-        (!q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
+        (!q || p.name.toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q))
     );
     if (!items.length) return;
     total += items.length;
@@ -104,18 +109,18 @@ function renderCatalog(filter = "") {
 }
 
 function productCard(p) {
-  const alt = p.images.length > 1;
+  const alt = p.images && p.images.length > 1;
   const off = isOff(p);
   const card = el(`
     <article class="product-card" tabindex="0" role="button" aria-label="Ver ${p.name}">
       <div class="product-media">
         ${!p.inStock ? '<span class="badge badge-out">Sin stock</span>' : off ? '<span class="badge badge-off">Oferta</span>' : ""}
-        <img class="img-main" src="${p.images[0]}" alt="${p.name}" loading="lazy" />
-        ${alt ? `<img class="img-alt" src="${p.images[1]}" alt="" loading="lazy" />` : ""}
+        <img class="img-main" src="${imgOf(p, 0)}" alt="${p.name}" loading="lazy" />
+        ${alt ? `<img class="img-alt" src="${imgOf(p, 1)}" alt="" loading="lazy" />` : ""}
       </div>
       <div class="product-info">
         <div class="product-name">${p.name}</div>
-        <div class="product-meta">${p.specs["Material de la hoja"] || ""}</div>
+        <div class="product-meta">${(p.specs && p.specs["Material de la hoja"]) || ""}</div>
         <div class="product-foot">
           <div class="product-price">
             <span class="price-now">${fmt(priceOf(p))}</span>
@@ -143,15 +148,16 @@ const modalBody = $("#modal-body");
 
 function openModal(p) {
   const off = isOff(p);
-  const specRows = Object.entries(p.specs).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
-  const thumbs = p.images.length > 1
-    ? `<div class="modal-thumbs">${p.images.map((s, i) => `<img src="${s}" data-i="${i}" class="${i === 0 ? "active" : ""}" alt="" />`).join("")}</div>`
+  const specRows = Object.entries(p.specs || {}).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
+  const imgs = p.images && p.images.length ? p.images : [PLACEHOLDER];
+  const thumbs = imgs.length > 1
+    ? `<div class="modal-thumbs">${imgs.map((s, i) => `<img src="${s}" data-i="${i}" class="${i === 0 ? "active" : ""}" alt="" />`).join("")}</div>`
     : "";
 
   modalBody.innerHTML = `
     <div class="modal-grid">
       <div class="modal-gallery">
-        <div class="main-img"><img id="modal-main" src="${p.images[0]}" alt="${p.name}" /></div>
+        <div class="main-img"><img id="modal-main" src="${imgs[0]}" alt="${p.name}" /></div>
         ${thumbs}
       </div>
       <div class="modal-detail">
@@ -162,8 +168,8 @@ function openModal(p) {
           ${off ? `<span class="price-old">${fmt(p.price)}</span>` : ""}
         </div>
         <p class="stock-line ${p.inStock ? "stock-in" : "stock-out"}">${p.inStock ? "● Disponible" : "● Sin stock"}</p>
-        <p class="modal-desc">${p.description}</p>
-        <table class="spec-table"><tbody>${specRows}</tbody></table>
+        <p class="modal-desc">${(p.description || "").replace(/\n/g, "<br>")}</p>
+        ${specRows ? `<table class="spec-table"><tbody>${specRows}</tbody></table>` : ""}
         ${p.inStock
           ? `<button class="btn btn-gold btn-block" id="modal-add">Agregar al carrito</button>`
           : `<a class="btn btn-wa btn-block" href="${waLink(`¡Hola ${STORE.name}! Quiero que me avisen cuando el cuchillo *${p.name}* vuelva a tener stock.`)}" target="_blank" rel="noopener">Avisarme cuando esté</a>`}
@@ -173,7 +179,7 @@ function openModal(p) {
   const main = $("#modal-main", modalBody);
   $$(".modal-thumbs img", modalBody).forEach((t) => {
     t.addEventListener("click", () => {
-      main.src = p.images[t.dataset.i];
+      main.src = imgs[t.dataset.i];
       $$(".modal-thumbs img", modalBody).forEach((x) => x.classList.remove("active"));
       t.classList.add("active");
     });
@@ -190,16 +196,13 @@ modal.addEventListener("click", (e) => { if (e.target.hasAttribute("data-close")
 /* ---------- Carrito ---------- */
 const drawer = $("#drawer");
 function addToCart(slug) { cart[slug] = (cart[slug] || 0) + 1; save(); syncCart(); }
-function setQty(slug, qty) {
-  if (qty <= 0) delete cart[slug]; else cart[slug] = qty;
-  save(); syncCart();
-}
+function setQty(slug, qty) { if (qty <= 0) delete cart[slug]; else cart[slug] = qty; save(); syncCart(); }
 function cartEntries() {
   return Object.entries(cart)
-    .map(([slug, qty]) => ({ p: PRODUCTS.find((x) => x.slug === slug), qty }))
+    .map(([slug, qty]) => ({ p: BY_SLUG.get(slug), qty }))
     .filter((e) => e.p);
 }
-function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
+function cartCount() { return cartEntries().reduce((a, e) => a + e.qty, 0); }
 function cartTotal() { return cartEntries().reduce((a, e) => a + priceOf(e.p) * e.qty, 0); }
 
 function syncCart() {
@@ -216,7 +219,7 @@ function syncCart() {
     entries.forEach(({ p, qty }) => {
       const row = el(`
         <div class="cart-item">
-          <img src="${p.images[0]}" alt="${p.name}" />
+          <img src="${imgOf(p, 0)}" alt="${p.name}" />
           <div class="ci-body">
             <div class="ci-name">${p.name}</div>
             <div class="ci-price">${fmt(priceOf(p))}</div>
@@ -265,7 +268,7 @@ const mnav = $("#mobile-nav");
 $("#menu-btn").addEventListener("click", () => mnav.classList.toggle("open"));
 $$("#mobile-nav a").forEach((a) => a.addEventListener("click", () => mnav.classList.remove("open")));
 
-/* ---------- Cerrar con Escape ---------- */
+/* ---------- Escape cierra ---------- */
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (!modal.hidden) closeModal();
@@ -273,8 +276,13 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ---------- Init ---------- */
-wireContact();
-renderCategories();
-renderFeatures();
-renderCatalog();
-syncCart();
+async function init() {
+  wireContact();
+  renderCategories();
+  renderFeatures();
+  CATALOG = await loadProducts();
+  BY_SLUG = new Map(CATALOG.map((p) => [p.slug, p]));
+  renderCatalog();
+  syncCart();
+}
+init();

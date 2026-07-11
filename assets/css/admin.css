@@ -1,0 +1,88 @@
+/* ============================================================================
+   URCO — Estilos del panel de administración (reutiliza las variables de
+   styles.css). Layout limpio, mismo tema oro/negro.
+   ========================================================================== */
+.admin { min-height: 100vh; }
+.admin-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--muted); letter-spacing: 2px; }
+.muted { color: var(--muted); }
+.admin code { background: var(--panel-2); padding: 2px 6px; border-radius: 4px; color: var(--gold); font-size: 13px; }
+
+/* Marca */
+.admin-brand { display: flex; align-items: center; gap: 12px; font-family: var(--serif); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+.admin-brand img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold); }
+.admin-brand span { font-size: 18px; }
+
+/* ---- Login / avisos centrados ---- */
+.admin-center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.admin-card { width: 100%; max-width: 400px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 34px; }
+.admin-card .admin-brand { justify-content: center; margin-bottom: 22px; }
+.admin-card h2 { font-family: var(--serif); font-size: 24px; text-align: center; margin-bottom: 8px; letter-spacing: 1px; }
+.admin-card p { text-align: center; font-size: 14px; margin: 0 0 22px; }
+
+/* Campos de formulario */
+.fld { display: block; margin-bottom: 16px; }
+.fld > span { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.fld input, .fld select, .fld textarea {
+  width: 100%; background: var(--bg-2); border: 1px solid var(--line); border-radius: 5px;
+  color: var(--text); padding: 12px 14px; font-family: var(--sans); font-size: 14px; outline: none; transition: border-color .2s;
+}
+.fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--gold); }
+.fld textarea { resize: vertical; }
+.fld-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.chk { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 14px; color: var(--text); cursor: pointer; }
+.chk input { width: 18px; height: 18px; accent-color: var(--gold); }
+.form-error { color: var(--danger); font-size: 13px; margin: 4px 0 14px; }
+.admin-back { display: block; text-align: center; margin-top: 16px; color: var(--muted); font-size: 13px; letter-spacing: 1px; }
+.admin-back:hover { color: var(--gold); }
+
+/* Botones extra */
+.btn.sm { padding: 8px 14px; font-size: 11px; letter-spacing: 1px; }
+.btn-danger { background: transparent; color: var(--danger); border-color: rgba(193,90,78,.4); }
+.btn-danger:hover { background: rgba(193,90,78,.12); border-color: var(--danger); }
+
+/* ---- Top bar del dashboard ---- */
+.admin-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; border-bottom: 1px solid var(--line); background: rgba(11,9,6,.7); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px); }
+.admin-actions { display: flex; gap: 10px; }
+.admin-main { max-width: 960px; margin: 0 auto; padding: 34px 22px 80px; }
+.admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.admin-head h1 { font-family: var(--serif); font-size: 30px; letter-spacing: 2px; text-transform: uppercase; }
+
+/* ---- Lista de productos ---- */
+.admin-list { display: flex; flex-direction: column; gap: 12px; }
+.admin-row { display: grid; grid-template-columns: 66px 1fr auto auto; align-items: center; gap: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; }
+.admin-row img { width: 66px; height: 66px; object-fit: cover; border-radius: 5px; border: 1px solid var(--line); }
+.ar-name { font-family: var(--serif); font-weight: 700; font-size: 18px; letter-spacing: .5px; text-transform: uppercase; }
+.ar-meta { color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.ar-price { font-family: var(--serif); color: var(--gold); font-size: 18px; white-space: nowrap; }
+.ar-price s { color: var(--muted); font-size: 13px; }
+.ar-btns { display: flex; gap: 8px; }
+
+/* ---- Editor (modal) ---- */
+.admin-editor { max-width: 720px; }
+.admin-form { padding: 34px; }
+.admin-form h2 { font-family: var(--serif); font-size: 26px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 22px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+
+/* Ficha técnica dinámica */
+#specs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.spec-line { display: grid; grid-template-columns: 1fr 1fr 34px; gap: 8px; }
+.spec-line input { width: 100%; background: var(--bg-2); border: 1px solid var(--line); border-radius: 5px; color: var(--text); padding: 10px 12px; font-size: 13px; outline: none; }
+.spec-line input:focus { border-color: var(--gold); }
+.spec-del { background: transparent; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); cursor: pointer; font-size: 18px; }
+.spec-del:hover { color: var(--danger); border-color: var(--danger); }
+
+/* Gestor de imágenes */
+.img-manager { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.img-item { position: relative; width: 84px; height: 84px; }
+.img-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 1px solid var(--line); }
+.img-del { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; background: var(--danger); color: #fff; border: none; cursor: pointer; font-size: 14px; line-height: 1; }
+#f-files { color: var(--muted); font-size: 13px; }
+.fld small { display: block; margin-top: 6px; }
+
+@media (max-width: 640px) {
+  .fld-row { grid-template-columns: 1fr; }
+  .admin-row { grid-template-columns: 54px 1fr; row-gap: 10px; }
+  .admin-row img { width: 54px; height: 54px; }
+  .ar-price, .ar-btns { grid-column: 2; }
+  .admin-form, .admin-card { padding: 22px; }
+}

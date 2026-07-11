@@ -15,23 +15,47 @@ código autónomo y editable.
 - **Modal de producto** con galería de imágenes, ficha técnica y botón de compra
   por **WhatsApp**.
 - **100% responsive** (desktop / tablet / mobile).
-- **Sin backend**: todo el catálogo vive en un único archivo de datos.
+- **Buscador** en vivo y **carrito** con checkout por WhatsApp.
+- **Panel de administración** (`admin.html`) con **login**: el admin sube
+  cuchillos, cambia precios/stock e imágenes; los visitantes sólo ven y piden.
+- Funciona en **modo demo** con catálogo estático, o conectado a **Supabase**
+  (base de datos + almacenamiento de imágenes + login) — ver [`SETUP.md`](SETUP.md).
 
 ## 📁 Estructura
 
 ```
 urco_project/
-├── index.html
+├── index.html                # tienda pública
+├── admin.html                # panel de administración (login)
 ├── assets/
-│   ├── css/styles.css        # estilos y tema
+│   ├── css/
+│   │   ├── styles.css        # estilos y tema de la tienda
+│   │   └── admin.css         # estilos del panel admin
 │   ├── js/
-│   │   ├── data.js           # catálogo, categorías y datos de la tienda
-│   │   └── app.js            # render e interacción
+│   │   ├── data.js           # marca, categorías y catálogo de demo (fallback)
+│   │   ├── config.js         # claves de Supabase (URL + anon key)
+│   │   ├── store.js          # capa de datos (Supabase o estático)
+│   │   ├── app.js            # tienda pública: render e interacción
+│   │   └── admin.js          # panel: login + ABM + subida de imágenes
 │   └── img/
 │       ├── hero.jpg, logo.jpg, cat-*.jpg
 │       └── products/         # fotos de cada cuchillo
+├── db/
+│   ├── schema.sql            # tabla, permisos RLS y bucket de imágenes
+│   └── seed.sql              # catálogo inicial (opcional)
+├── SETUP.md                  # cómo conectar Supabase paso a paso
 └── README.md
 ```
+
+## 🔐 Admin vs. usuarios
+
+- **Visitantes** (cualquiera con la URL): ven el catálogo y hacen el pedido por
+  WhatsApp. **No pueden editar nada.**
+- **Admin** (con login en `admin.html`): crea/edita/elimina cuchillos, cambia
+  precios, ofertas, stock, descripciones y **sube imágenes**.
+
+La separación se garantiza en el **servidor** (políticas RLS de Supabase), no en
+el navegador. Configuración: [`SETUP.md`](SETUP.md).
 
 ## 🚀 Cómo ejecutar
 
