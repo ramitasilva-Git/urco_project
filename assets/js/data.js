@@ -16,9 +16,17 @@ export const STORE = {
 };
 
 export const CATEGORIES = [
-  { slug: "cocina",     name: "COCINA",     image: "assets/img/cat-cocina.jpg",     blurb: "Filos de precisión para el trabajo diario en la cocina." },
-  { slug: "japones",    name: "JAPONES",    image: "assets/img/cat-japones.jpg",    blurb: "Perfiles orientales de alta versatilidad y estética cuidada." },
-  { slug: "aire-libre", name: "AIRE LIBRE", image: "assets/img/cat-aire-libre.jpg", blurb: "Herramientas robustas para el campo, la caza y la aventura." },
+  { slug: "cocina",     name: "COCINA",     icon: "chef",     image: "assets/img/cat-cocina.jpg",     blurb: "Precisión y rendimiento en cada corte." },
+  { slug: "japones",    name: "JAPONES",    icon: "torii",    image: "assets/img/cat-japones.jpg",    blurb: "Tradición japonesa, filo impecable." },
+  { slug: "aire-libre", name: "AIRE LIBRE", icon: "mountain", image: "assets/img/cat-aire-libre.jpg", blurb: "Hechos para cada aventura." },
+];
+
+// Barra de confianza / garantías
+export const FEATURES = [
+  { icon: "shield", title: "Acero de alta calidad" },
+  { icon: "hammer", title: "Hechos a mano artesanales" },
+  { icon: "truck",  title: "Envíos a todo el país" },
+  { icon: "medal",  title: "Garantía de satisfacción" },
 ];
 
 // price: precio de lista. discountedPrice: precio final si hay oferta (o null).

@@ -3,49 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>URCO — Nobleza de Acero</title>
-  <meta name="description" content="URCO — Cuchillos artesanales de acero. Desde la cocina hasta el monte, el filo que te acompaña siempre." />
+  <title>URCO — Nobleza de Acero | Cuchillos Artesanales</title>
+  <meta name="description" content="URCO — Cuchillos artesanales de acero de alta calidad. Cocina, estilo japonés y aire libre. Hechos a mano, envíos a todo el país." />
   <meta property="og:title" content="URCO — Nobleza de Acero" />
-  <meta property="og:description" content="Cuchillos artesanales de acero para cocina, estilo japonés y aire libre." />
+  <meta property="og:description" content="Cuchillos artesanales de acero de alta calidad. Hechos a mano." />
   <meta property="og:image" content="assets/img/hero.jpg" />
   <meta property="og:type" content="website" />
   <link rel="icon" href="assets/img/logo.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <!-- ===================== TOP BAR ===================== -->
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+      <span>Cuchillos artesanales de alta calidad</span>
+    </div>
+  </div>
+
   <!-- ===================== HEADER ===================== -->
   <header class="site-header" id="top">
     <div class="container header-inner">
+      <button class="icon-btn menu-btn" id="menu-btn" aria-label="Menú">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
       <a class="brand" href="#top">
-        <img src="assets/img/logo.jpg" alt="URCO" class="brand-logo" />
+        <img src="assets/img/logo.jpg" alt="" class="brand-logo" />
         <span class="brand-name">URCO</span>
       </a>
-      <nav class="nav" aria-label="Categorías">
-        <a href="#cocina">Cocina</a>
-        <a href="#japones">Japonés</a>
-        <a href="#aire-libre">Aire Libre</a>
-      </nav>
-      <a class="btn btn-wa header-wa" data-wa-store target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.588 5.34l-.999 3.648 3.91-.788zm5.83-6.472c-.075-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414z"/></svg>
-        Consultar
-      </a>
+      <button class="icon-btn cart-btn" id="cart-btn" aria-label="Carrito">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.57l1.65-7.43H5.1"/></svg>
+        <span class="cart-count" id="cart-count" hidden>0</span>
+      </button>
     </div>
+    <div class="container search-wrap">
+      <label class="search" for="search">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="search" placeholder="Buscar productos..." autocomplete="off" />
+      </label>
+    </div>
+    <!-- Menú móvil desplegable -->
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación">
+      <a href="#cocina">Cocina</a>
+      <a href="#japones">Japonés</a>
+      <a href="#aire-libre">Aire Libre</a>
+    </nav>
   </header>
 
   <!-- ===================== HERO ===================== -->
   <section class="hero">
-    <img class="hero-bg" src="assets/img/hero.jpg" alt="" aria-hidden="true" />
-    <div class="hero-overlay"></div>
-    <div class="container hero-content">
-      <p class="hero-kicker">Cuchillos artesanales de acero</p>
-      <h1 class="hero-title">NOBLEZA DE ACERO</h1>
-      <p class="hero-subtitle">Desde la cocina hasta el monte, el filo que te acompaña siempre.</p>
-      <div class="hero-actions">
-        <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
-        <a href="#aire-libre" class="btn btn-ghost">Línea de campo</a>
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <p class="hero-kicker"><span class="rule"></span> URCO</p>
+        <h1 class="hero-title">Nobleza<br />de Acero</h1>
+        <div class="hero-divider"></div>
+        <p class="hero-subtitle">Desde la cocina hasta el monte,<br />el filo que te acompaña siempre.</p>
+        <a href="#catalogo" class="btn btn-gold">
+          Ver productos
+          <svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="hero-media">
+        <img src="assets/img/products/cleaver-1.jpg" alt="Cuchillo artesanal URCO" />
       </div>
     </div>
   </section>
@@ -53,39 +75,64 @@
   <!-- ===================== CATEGORÍAS ===================== -->
   <section class="section" id="categorias">
     <div class="container">
-      <h2 class="section-title">Explorá por categoría</h2>
+      <h2 class="section-title"><span class="rule"></span> Categorías <span class="rule"></span></h2>
       <div class="cat-grid" id="cat-grid"><!-- render JS --></div>
     </div>
   </section>
 
+  <!-- ===================== BARRA DE GARANTÍAS ===================== -->
+  <section class="features">
+    <div class="container feature-grid" id="feature-grid"><!-- render JS --></div>
+  </section>
+
   <!-- ===================== CATÁLOGO ===================== -->
   <main class="section" id="catalogo">
-    <div class="container" id="catalog"><!-- render JS --></div>
+    <div class="container">
+      <h2 class="section-title"><span class="rule"></span> Nuestros Cuchillos <span class="rule"></span></h2>
+      <div id="catalog"><!-- render JS --></div>
+      <p class="no-results" id="no-results" hidden>No encontramos cuchillos que coincidan con tu búsqueda.</p>
+    </div>
   </main>
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="site-footer">
-    <div class="container footer-inner">
-      <div>
-        <img src="assets/img/logo.jpg" alt="URCO" class="footer-logo" />
-        <p class="footer-tag">Nobleza de acero — hecho a mano.</p>
-      </div>
-      <div class="footer-links">
-        <a data-wa-store target="_blank" rel="noopener">WhatsApp</a>
-        <a data-ig target="_blank" rel="noopener">Instagram</a>
-        <a href="#top">Volver arriba</a>
-      </div>
+    <div class="container">
+      <div class="footer-brand">URCO <span>|</span> Cuchillos Artesanales</div>
+      <a class="footer-ig" data-ig target="_blank" rel="noopener" aria-label="Instagram">
+        <svg class="ico" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+      </a>
+      <p class="footer-copy">© <span id="year"></span> URCO. Nobleza de acero, hecho a mano.</p>
     </div>
-    <p class="footer-copy">© <span id="year"></span> URCO. Todos los derechos reservados.</p>
   </footer>
 
   <!-- ===================== MODAL PRODUCTO ===================== -->
   <div class="modal" id="modal" hidden>
     <div class="modal-backdrop" data-close></div>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-name">
-      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+      <button class="modal-close" data-close aria-label="Cerrar">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
       <div class="modal-body" id="modal-body"><!-- render JS --></div>
     </div>
+  </div>
+
+  <!-- ===================== CARRITO (drawer) ===================== -->
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer-backdrop" data-cart-close></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="Carrito de compras">
+      <header class="drawer-head">
+        <h3>Tu carrito</h3>
+        <button class="icon-btn" data-cart-close aria-label="Cerrar carrito">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+      <div class="drawer-items" id="drawer-items"><!-- render JS --></div>
+      <footer class="drawer-foot">
+        <div class="drawer-total"><span>Total</span><strong id="cart-total">AR$0</strong></div>
+        <a class="btn btn-wa btn-block" id="checkout-wa" target="_blank" rel="noopener">Finalizar por WhatsApp</a>
+        <p class="drawer-note">Coordinás el pago y el envío directamente por WhatsApp.</p>
+      </footer>
+    </aside>
   </div>
 
   <script type="module" src="assets/js/app.js"></script>
