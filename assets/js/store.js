@@ -5,7 +5,7 @@
 //  de forma diferida para no pesar cuando no se usa.
 // ============================================================================
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
-import { PRODUCTS as STATIC_PRODUCTS } from "./data.js";
+import { PRODUCTS as STATIC_PRODUCTS, CATEGORIES as STATIC_CATEGORIES } from "./data.js";
 
 export const hasSupabase = () =>
   !!SUPABASE_URL && !!SUPABASE_ANON_KEY &&
@@ -22,6 +22,36 @@ export async function getClient() {
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
   _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   return _client;
+}
+
+// Normaliza una categoría de la base
+export function rowToCategory(r) {
+  return {
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    icon: r.icon || "blade",
+    image: r.image || "",
+    blurb: r.blurb || "",
+  };
+}
+
+// Devuelve las categorías (Supabase o estáticas de fallback)
+export async function loadCategories() {
+  const client = await getClient();
+  if (!client) return STATIC_CATEGORIES;
+  try {
+    const { data, error } = await client
+      .from("categories")
+      .select("*")
+      .order("sort_index", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return data && data.length ? data.map(rowToCategory) : STATIC_CATEGORIES;
+  } catch (e) {
+    console.warn("[URCO] No se pudieron cargar categorías, uso estáticas:", e.message);
+    return STATIC_CATEGORIES;
+  }
 }
 
 // Normaliza una fila de la base al formato que usa el frontend
@@ -54,7 +84,7 @@ export async function loadProducts() {
     if (error) throw error;
     return data && data.length ? data.map(rowToProduct) : STATIC_PRODUCTS;
   } catch (e) {
-    console.error("[URCO] No se pudo cargar desde Supabase, uso catálogo estático:", e.message);
+    console.warn("[URCO] No se pudo cargar desde Supabase, uso catálogo estático:", e.message);
     return STATIC_PRODUCTS;
   }
 }

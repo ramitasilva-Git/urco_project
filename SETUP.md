@@ -18,10 +18,14 @@ esos cambios los vean todos los visitantes— hay que conectar **Supabase** (gra
 ### 2. Crear la base de datos
 1. En el menú lateral: **SQL Editor → New query**.
 2. Pegá y ejecutá **todo** el contenido de [`db/schema.sql`](db/schema.sql) → **Run**.
+   Esto crea las tablas `products` y `categories`, las reglas de permisos y el
+   bucket de imágenes.
 3. (Opcional) Para cargar los 8 cuchillos de la demo, ejecutá también
    [`db/seed.sql`](db/seed.sql).
 
-Esto crea la tabla `products`, las reglas de permisos y el bucket de imágenes `products`.
+> ¿Ya habías corrido una versión vieja de `schema.sql` sin categorías? Ejecutá
+> una sola vez [`db/categories.sql`](db/categories.sql) para crear la tabla de
+> categorías y sus 3 categorías iniciales.
 
 ### 3. Crear el usuario admin
 1. Menú lateral: **Authentication → Users → Add user → Create new user**.

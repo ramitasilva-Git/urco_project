@@ -3,8 +3,9 @@
 //  Render + búsqueda + carrito (checkout por WhatsApp) + modal.
 //  Los productos se cargan desde Supabase (o el catálogo estático de demo).
 // ============================================================================
-import { STORE, CATEGORIES, FEATURES } from "./data.js";
-import { loadProducts, PLACEHOLDER } from "./store.js";
+import { STORE, FEATURES } from "./data.js";
+import { loadProducts, loadCategories, PLACEHOLDER } from "./store.js";
+import { ICONS } from "./icons.js";
 
 /* ---------- Helpers ---------- */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -19,22 +20,12 @@ const el = (html) => {
   return t.content.firstElementChild;
 };
 const waLink = (text) => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
-const catName = (slug) => (CATEGORIES.find((c) => c.slug === slug) || {}).name || "";
+const catName = (slug) => (CATS.find((c) => c.slug === slug) || {}).name || "";
 
-/* ---------- Catálogo (cargado async) ---------- */
+/* ---------- Datos (cargados async) ---------- */
+let CATS = [];
 let CATALOG = [];
 let BY_SLUG = new Map();
-
-/* ---------- Iconos (SVG) ---------- */
-const ICONS = {
-  chef: '<path d="M6 13.87A4 4 0 0 1 7.4 6a5.1 5.1 0 0 1 1.06-1.54 5 5 0 0 1 7.08 0A5.1 5.1 0 0 1 16.6 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/>',
-  torii: '<path d="M3 7h18M4.5 10.5h15M7 7v12M17 7v12"/><path d="M3 7c2-3 16-3 18 0"/>',
-  mountain: '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
-  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
-  hammer: '<path d="m15 12-8.5 8.5a2.12 2.12 0 1 1-3-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.9 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h2.47l2.26 1.9"/>',
-  truck: '<path d="M14 18V6a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1"/><path d="M14 9h4l4 4v4a1 1 0 0 1-1 1h-1"/><circle cx="7.5" cy="18.5" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/>',
-  medal: '<circle cx="12" cy="9" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/>',
-};
 
 /* ---------- Estado carrito ---------- */
 const CART_KEY = "urco_cart";
@@ -51,7 +42,8 @@ function wireContact() {
 /* ---------- Categorías ---------- */
 function renderCategories() {
   const grid = $("#cat-grid");
-  CATEGORIES.forEach((c) => {
+  grid.innerHTML = "";
+  CATS.forEach((c) => {
     grid.appendChild(el(`
       <a class="cat-card" href="#${c.slug}">
         <img src="${c.image}" alt="${c.name}" loading="lazy" />
@@ -83,7 +75,7 @@ function renderCatalog(filter = "") {
   const q = filter.trim().toLowerCase();
   let total = 0;
 
-  CATEGORIES.forEach((cat) => {
+  CATS.forEach((cat) => {
     const items = CATALOG.filter(
       (p) => p.category === cat.slug &&
         (!q || p.name.toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q))
@@ -278,10 +270,10 @@ document.addEventListener("keydown", (e) => {
 /* ---------- Init ---------- */
 async function init() {
   wireContact();
-  renderCategories();
   renderFeatures();
-  CATALOG = await loadProducts();
+  [CATS, CATALOG] = await Promise.all([loadCategories(), loadProducts()]);
   BY_SLUG = new Map(CATALOG.map((p) => [p.slug, p]));
+  renderCategories();
   renderCatalog();
   syncCart();
 }

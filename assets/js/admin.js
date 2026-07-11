@@ -1,11 +1,12 @@
 // ============================================================================
 //  URCO — Panel de administración
-//  Login (Supabase Auth) + ABM de productos + subida de imágenes a Storage.
+//  Login (Supabase Auth) + ABM de categorías y productos + subida de imágenes.
 //  Los usuarios comunes NO tienen acceso: las políticas RLS del servidor
 //  sólo permiten escribir a usuarios autenticados.
 // ============================================================================
-import { CATEGORIES, STORE } from "./data.js";
-import { getClient, hasSupabase, rowToProduct, PLACEHOLDER } from "./store.js";
+import { STORE } from "./data.js";
+import { getClient, hasSupabase, rowToProduct, rowToCategory, PLACEHOLDER } from "./store.js";
+import { ICONS, PICKABLE_ICONS } from "./icons.js";
 
 const app = document.getElementById("app");
 const fmt = (n) => `${STORE.currency}${Number(n).toLocaleString("es-AR")}`;
@@ -13,9 +14,11 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const slugify = (s) =>
   String(s).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const svg = (key) => `<svg class="ico" viewBox="0 0 24 24">${ICONS[key] || ICONS.blade}</svg>`;
 
 const BUCKET = "products";
 let supabase = null;
+let categories = [];
 let products = [];
 
 /* ---------- Arranque ---------- */
@@ -78,7 +81,6 @@ function renderLogin() {
       errBox.hidden = false;
       btn.disabled = false; btn.textContent = "Ingresar";
     }
-    // Si sale bien, onAuthStateChange dispara route()
   });
 }
 
@@ -94,33 +96,192 @@ async function renderDashboard() {
       </div>
     </header>
     <main class="admin-main">
-      <div class="admin-head">
-        <h1>Productos</h1>
-        <button class="btn btn-gold" id="new-btn">+ Nuevo cuchillo</button>
-      </div>
-      <div id="list" class="admin-list"><p class="muted">Cargando productos…</p></div>
+      <section class="admin-section">
+        <div class="admin-head">
+          <h1>Categorías</h1>
+          <button class="btn btn-gold" id="new-cat">+ Nueva categoría</button>
+        </div>
+        <div id="cat-list" class="admin-list"><p class="muted">Cargando…</p></div>
+      </section>
+
+      <section class="admin-section">
+        <div class="admin-head">
+          <h1>Productos</h1>
+          <button class="btn btn-gold" id="new-prod">+ Nuevo cuchillo</button>
+        </div>
+        <div id="prod-list" class="admin-list"><p class="muted">Cargando…</p></div>
+      </section>
     </main>
     <div id="editor"></div>`;
 
   document.getElementById("logout").addEventListener("click", () => supabase.auth.signOut());
-  document.getElementById("new-btn").addEventListener("click", () => openEditor(null));
-  await loadList();
+  document.getElementById("new-cat").addEventListener("click", () => openCatEditor(null));
+  document.getElementById("new-prod").addEventListener("click", () => openProdEditor(null));
+  await loadAll();
 }
 
-async function loadList() {
-  const list = document.getElementById("list");
+async function loadAll() {
+  await Promise.all([loadCatList(), loadProdList()]);
+}
+
+/* ==========================================================================
+   CATEGORÍAS
+   ======================================================================== */
+async function loadCatList() {
+  const box = document.getElementById("cat-list");
+  const { data, error } = await supabase.from("categories").select("*")
+    .order("sort_index", { ascending: true }).order("created_at", { ascending: true });
+  if (error) {
+    categories = [];
+    box.innerHTML = `<p class="form-error">Falta la tabla de categorías. Ejecutá <code>db/categories.sql</code> en el SQL Editor de Supabase y recargá.</p>`;
+    return;
+  }
+  categories = (data || []).map(rowToCategory);
+  if (!categories.length) {
+    box.innerHTML = `<p class="muted">Todavía no hay categorías. Creá la primera con “+ Nueva categoría”.</p>`;
+    return;
+  }
+  box.innerHTML = "";
+  categories.forEach((c) => {
+    const row = document.createElement("div");
+    row.className = "admin-row";
+    row.innerHTML = `
+      <img src="${c.image || PLACEHOLDER}" alt="" />
+      <div class="ar-main">
+        <div class="ar-name">${svg(c.icon)} ${esc(c.name)}</div>
+        <div class="ar-meta">${esc(c.blurb || "")}</div>
+      </div>
+      <div class="ar-price"></div>
+      <div class="ar-btns">
+        <button class="btn btn-ghost sm" data-edit>Editar</button>
+        <button class="btn btn-danger sm" data-del>Eliminar</button>
+      </div>`;
+    row.querySelector("[data-edit]").addEventListener("click", () => openCatEditor(c));
+    row.querySelector("[data-del]").addEventListener("click", () => removeCategory(c));
+    box.appendChild(row);
+  });
+}
+
+async function removeCategory(c) {
+  const inCat = products.filter((p) => p.category === c.slug).length;
+  const warn = inCat ? `\n\nOJO: hay ${inCat} producto(s) en esta categoría y quedarán sin categoría visible.` : "";
+  if (!confirm(`¿Eliminar la categoría “${c.name}”?${warn}`)) return;
+  const { error } = await supabase.from("categories").delete().eq("id", c.id);
+  if (error) return alert("No se pudo eliminar: " + error.message);
+  await loadAll();
+}
+
+function openCatEditor(c) {
+  const isNew = !c;
+  const data = c || { name: "", icon: "blade", image: "", blurb: "" };
+  const editor = document.getElementById("editor");
+
+  editor.innerHTML = `
+    <div class="modal" style="display:flex">
+      <div class="modal-backdrop" data-x></div>
+      <div class="modal-card admin-editor">
+        <button class="modal-close" data-x aria-label="Cerrar">${svg("blade").replace(ICONS.blade, ICONS.blade)}<svg class="ico" viewBox="0 0 24 24" style="display:none"></svg></button>
+        <form id="cat-form" class="admin-form">
+          <h2>${isNew ? "Nueva categoría" : "Editar categoría"}</h2>
+
+          <label class="fld"><span>Nombre *</span><input id="c-name" required value="${esc(data.name)}" placeholder="Ej: CAZA" /></label>
+
+          <div class="fld">
+            <span>Ícono</span>
+            <div class="icon-picker" id="c-iconpick">
+              ${PICKABLE_ICONS.map((k) => `<button type="button" class="icon-opt ${k === data.icon ? "sel" : ""}" data-icon="${k}" title="${k}">${svg(k)}</button>`).join("")}
+            </div>
+            <input type="hidden" id="c-icon" value="${esc(data.icon)}" />
+          </div>
+
+          <label class="fld"><span>Descripción corta</span><input id="c-blurb" value="${esc(data.blurb)}" placeholder="Ej: Para cada aventura." /></label>
+
+          <div class="fld">
+            <span>Imagen de la categoría</span>
+            <div id="c-imgs" class="img-manager">${data.image ? imgThumb(data.image) : ""}</div>
+            <input id="c-file" type="file" accept="image/*" />
+          </div>
+
+          <p class="form-error" id="cat-error" hidden></p>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" data-x>Cancelar</button>
+            <button type="submit" class="btn btn-gold" id="cat-save">${isNew ? "Crear categoría" : "Guardar cambios"}</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+
+  // Botón cerrar (icono X limpio)
+  editor.querySelector(".modal-close").innerHTML = `<svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>`;
+
+  const close = () => (editor.innerHTML = "");
+  editor.querySelectorAll("[data-x]").forEach((b) => b.addEventListener("click", close));
+
+  // Picker de íconos
+  const iconInput = editor.querySelector("#c-icon");
+  editor.querySelectorAll("#c-iconpick .icon-opt").forEach((b) => {
+    b.addEventListener("click", () => {
+      editor.querySelectorAll("#c-iconpick .icon-opt").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel");
+      iconInput.value = b.dataset.icon;
+    });
+  });
+
+  // Quitar imagen existente
+  bindImgRemovers(editor, "#c-imgs");
+
+  editor.querySelector("#cat-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errBox = editor.querySelector("#cat-error");
+    const saveBtn = editor.querySelector("#cat-save");
+    errBox.hidden = true; saveBtn.disabled = true; saveBtn.textContent = "Guardando…";
+    try {
+      const kept = [...editor.querySelectorAll("#c-imgs .img-item")].map((n) => n.dataset.url);
+      const file = editor.querySelector("#c-file").files[0];
+      const image = file ? await uploadImage(file) : (kept[0] || "");
+      const name = editor.querySelector("#c-name").value.trim();
+      const record = {
+        name,
+        icon: iconInput.value || "blade",
+        blurb: editor.querySelector("#c-blurb").value.trim(),
+        image,
+      };
+      if (isNew) {
+        record.slug = await uniqueSlug("categories", slugify(name) || "categoria");
+        record.sort_index = categories.length + 1;
+        const { error } = await supabase.from("categories").insert(record);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("categories").update(record).eq("id", c.id);
+        if (error) throw error;
+      }
+      close();
+      await loadAll();
+    } catch (err) {
+      errBox.textContent = "No se pudo guardar: " + (err.message || err);
+      errBox.hidden = false;
+      saveBtn.disabled = false; saveBtn.textContent = isNew ? "Crear categoría" : "Guardar cambios";
+    }
+  });
+}
+
+/* ==========================================================================
+   PRODUCTOS
+   ======================================================================== */
+async function loadProdList() {
+  const box = document.getElementById("prod-list");
   const { data, error } = await supabase.from("products").select("*")
     .order("sort_index", { ascending: true }).order("created_at", { ascending: true });
-  if (error) { list.innerHTML = `<p class="form-error">Error al cargar: ${esc(error.message)}</p>`; return; }
+  if (error) { box.innerHTML = `<p class="form-error">Error al cargar: ${esc(error.message)}</p>`; return; }
   products = (data || []).map(rowToProduct);
 
   if (!products.length) {
-    list.innerHTML = `<p class="muted">Todavía no hay productos. Creá el primero con “+ Nuevo cuchillo”.</p>`;
+    box.innerHTML = `<p class="muted">Todavía no hay productos. Creá el primero con “+ Nuevo cuchillo”.</p>`;
     return;
   }
-  list.innerHTML = "";
+  box.innerHTML = "";
   products.forEach((p) => {
-    const cat = (CATEGORIES.find((c) => c.slug === p.category) || {}).name || p.category;
+    const cat = (categories.find((c) => c.slug === p.category) || {}).name || p.category;
     const row = document.createElement("div");
     row.className = "admin-row";
     row.innerHTML = `
@@ -134,9 +295,9 @@ async function loadList() {
         <button class="btn btn-ghost sm" data-edit>Editar</button>
         <button class="btn btn-danger sm" data-del>Eliminar</button>
       </div>`;
-    row.querySelector("[data-edit]").addEventListener("click", () => openEditor(p));
+    row.querySelector("[data-edit]").addEventListener("click", () => openProdEditor(p));
     row.querySelector("[data-del]").addEventListener("click", () => removeProduct(p));
-    list.appendChild(row);
+    box.appendChild(row);
   });
 }
 
@@ -144,13 +305,16 @@ async function removeProduct(p) {
   if (!confirm(`¿Eliminar “${p.name}”? Esta acción no se puede deshacer.`)) return;
   const { error } = await supabase.from("products").delete().eq("id", p.id);
   if (error) return alert("No se pudo eliminar: " + error.message);
-  await loadList();
+  await loadProdList();
 }
 
-/* ---------- Editor (crear / editar) ---------- */
-function openEditor(p) {
+function openProdEditor(p) {
+  if (!categories.length) {
+    alert("Primero creá al menos una categoría.");
+    return;
+  }
   const isNew = !p;
-  const data = p || { name: "", category: CATEGORIES[0].slug, price: "", discountedPrice: null, inStock: true, description: "", specs: {}, images: [] };
+  const data = p || { name: "", category: categories[0].slug, price: "", discountedPrice: null, inStock: true, description: "", specs: {}, images: [] };
   const editor = document.getElementById("editor");
   const specRows = Object.entries(data.specs || {});
 
@@ -168,7 +332,7 @@ function openEditor(p) {
 
           <div class="fld-row">
             <label class="fld"><span>Categoría *</span>
-              <select id="f-cat">${CATEGORIES.map((c) => `<option value="${c.slug}" ${c.slug === data.category ? "selected" : ""}>${c.name}</option>`).join("")}</select>
+              <select id="f-cat">${categories.map((c) => `<option value="${c.slug}" ${c.slug === data.category ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
             </label>
             <label class="fld"><span>Precio (${STORE.currency}) *</span><input id="f-price" type="number" min="0" step="0.01" required value="${data.price}" /></label>
             <label class="fld"><span>Precio oferta</span><input id="f-disc" type="number" min="0" step="0.01" value="${data.discountedPrice ?? ""}" placeholder="opcional" /></label>
@@ -203,43 +367,28 @@ function openEditor(p) {
   const close = () => (editor.innerHTML = "");
   editor.querySelectorAll("[data-x]").forEach((b) => b.addEventListener("click", close));
 
-  // Specs dinámicos
   editor.querySelector("#add-spec").addEventListener("click", () => {
     editor.querySelector("#specs").insertAdjacentHTML("beforeend", specRow(["", ""]));
     bindSpecRemovers();
   });
   bindSpecRemovers();
   function bindSpecRemovers() {
-    editor.querySelectorAll("#specs .spec-del").forEach((b) => {
-      b.onclick = () => b.closest(".spec-line").remove();
-    });
+    editor.querySelectorAll("#specs .spec-del").forEach((b) => { b.onclick = () => b.closest(".spec-line").remove(); });
   }
+  bindImgRemovers(editor, "#imgs");
 
-  // Manager de imágenes existentes (quitar)
-  bindImgRemovers();
-  function bindImgRemovers() {
-    editor.querySelectorAll("#imgs .img-del").forEach((b) => {
-      b.onclick = () => b.closest(".img-item").remove();
-    });
-  }
-
-  // Guardar
   editor.querySelector("#prod-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const errBox = editor.querySelector("#form-error");
     const saveBtn = editor.querySelector("#save-btn");
-    errBox.hidden = true;
-    saveBtn.disabled = true; saveBtn.textContent = "Guardando…";
+    errBox.hidden = true; saveBtn.disabled = true; saveBtn.textContent = "Guardando…";
     try {
-      // 1) Imágenes existentes que se conservan (en orden)
       const kept = [...editor.querySelectorAll("#imgs .img-item")].map((n) => n.dataset.url);
-      // 2) Subir nuevas
       const files = [...editor.querySelector("#f-files").files];
       const uploaded = [];
       for (const file of files) uploaded.push(await uploadImage(file));
       const images = [...kept, ...uploaded];
 
-      // 3) Specs
       const specs = {};
       editor.querySelectorAll("#specs .spec-line").forEach((line) => {
         const k = line.querySelector(".spec-k").value.trim();
@@ -247,7 +396,6 @@ function openEditor(p) {
         if (k) specs[k] = v;
       });
 
-      // 4) Armar registro
       const name = editor.querySelector("#f-name").value.trim();
       const discRaw = editor.querySelector("#f-disc").value;
       const record = {
@@ -262,7 +410,7 @@ function openEditor(p) {
       };
 
       if (isNew) {
-        record.slug = await uniqueSlug(slugify(name) || "cuchillo");
+        record.slug = await uniqueSlug("products", slugify(name) || "cuchillo");
         record.sort_index = products.length + 1;
         const { error } = await supabase.from("products").insert(record);
         if (error) throw error;
@@ -271,7 +419,7 @@ function openEditor(p) {
         if (error) throw error;
       }
       close();
-      await loadList();
+      await loadProdList();
     } catch (err) {
       errBox.textContent = "No se pudo guardar: " + (err.message || err);
       errBox.hidden = false;
@@ -280,6 +428,7 @@ function openEditor(p) {
   });
 }
 
+/* ---------- Sub-render helpers ---------- */
 function specRow([k, v]) {
   return `<div class="spec-line">
     <input class="spec-k" placeholder="Ej: Material de la hoja" value="${esc(k)}" />
@@ -292,6 +441,11 @@ function imgThumb(url) {
     <img src="${esc(url)}" alt="" />
     <button type="button" class="img-del" aria-label="Quitar imagen">×</button>
   </div>`;
+}
+function bindImgRemovers(editor, sel) {
+  editor.querySelectorAll(`${sel} .img-del`).forEach((b) => {
+    b.onclick = () => b.closest(".img-item").remove();
+  });
 }
 
 /* ---------- Storage ---------- */
@@ -306,11 +460,10 @@ async function uploadImage(file) {
 }
 
 /* ---------- Slug único ---------- */
-async function uniqueSlug(base) {
+async function uniqueSlug(table, base) {
   let slug = base, i = 1;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
-    const { data } = await supabase.from("products").select("id").eq("slug", slug).maybeSingle();
+    const { data } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
     if (!data) return slug;
     slug = `${base}-${++i}`;
   }

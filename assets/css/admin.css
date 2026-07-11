@@ -44,8 +44,18 @@
 .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; border-bottom: 1px solid var(--line); background: rgba(11,9,6,.7); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px); }
 .admin-actions { display: flex; gap: 10px; }
 .admin-main { max-width: 960px; margin: 0 auto; padding: 34px 22px 80px; }
-.admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
-.admin-head h1 { font-family: var(--serif); font-size: 30px; letter-spacing: 2px; text-transform: uppercase; }
+.admin-section { margin-bottom: 46px; }
+.admin-section + .admin-section { padding-top: 8px; border-top: 1px solid var(--line-soft); }
+.admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.admin-head h1 { font-family: var(--serif); font-size: 26px; letter-spacing: 2px; text-transform: uppercase; }
+.ar-name .ico { width: 18px; height: 18px; color: var(--gold); vertical-align: -3px; margin-right: 4px; }
+
+/* Selector de íconos */
+.icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.icon-opt { width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-2); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: .18s; }
+.icon-opt .ico { width: 24px; height: 24px; }
+.icon-opt:hover { color: var(--gold); border-color: var(--gold); }
+.icon-opt.sel { color: var(--gold); border-color: var(--gold); background: rgba(201,162,76,.12); }
 
 /* ---- Lista de productos ---- */
 .admin-list { display: flex; flex-direction: column; gap: 12px; }
