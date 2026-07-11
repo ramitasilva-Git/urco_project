@@ -115,16 +115,33 @@ h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 800; }
 .mobile-nav a { padding: 14px 22px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-soft); }
 .mobile-nav a:hover { color: var(--gold); background: rgba(201,162,76,.05); }
 
-/* ---------- Hero ---------- */
-.hero { padding: 60px 0 40px; overflow: hidden; }
-.hero-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 40px; }
-.hero-kicker { display: flex; align-items: center; gap: 14px; color: var(--gold); font-weight: 600; letter-spacing: 6px; text-transform: uppercase; font-size: 14px; margin: 0 0 18px; }
-.hero-title { font-family: var(--serif); font-weight: 900; font-size: clamp(52px, 8vw, 104px); line-height: .92; letter-spacing: 1px; text-transform: uppercase; }
-.hero-divider { width: 220px; max-width: 60%; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); margin: 26px 0; }
-.hero-subtitle { color: var(--gold); font-weight: 500; letter-spacing: 3px; text-transform: uppercase; font-size: 15px; line-height: 1.9; margin: 0 0 34px; }
-.hero-media { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 4/5; border: 1px solid var(--line); box-shadow: 0 30px 60px -30px rgba(0,0,0,.9); }
-.hero-media::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 120px 20px rgba(11,9,6,.6); pointer-events: none; }
-.hero-media img { width: 100%; height: 100%; object-fit: cover; }
+/* ---------- Hero (banner cinematográfico full-bleed) ---------- */
+.hero { position: relative; min-height: 84vh; display: flex; align-items: center; overflow: hidden; }
+.hero-bg {
+  position: absolute; inset: 0;
+  background-image: url("../img/hero.jpg");
+  background-size: cover;
+  background-position: 72% center;
+  /* Vira el acero frío a un tono bronce cálido para que dialogue con el oro */
+  filter: sepia(.34) hue-rotate(-6deg) saturate(1.18) contrast(1.05) brightness(.9);
+  transform: scale(1.03);
+}
+/* Degradados: oscurece la izquierda (para el texto) y funde el borde inferior
+   con el fondo de la página, para que se integre y no parezca una imagen suelta */
+.hero-scrim {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9,7,4,.98) 0%, rgba(9,7,4,.9) 24%, rgba(9,7,4,.55) 55%, rgba(9,7,4,.12) 100%),
+    linear-gradient(0deg, var(--bg) 0%, rgba(11,9,6,.25) 15%, transparent 36%),
+    radial-gradient(120% 80% at 82% 42%, transparent 40%, rgba(9,7,4,.5) 100%);
+}
+.hero-content { position: relative; max-width: 620px; padding: 72px 0; }
+.hero-kicker { display: flex; align-items: center; gap: 16px; color: var(--gold); font-weight: 600; letter-spacing: 8px; text-transform: uppercase; font-size: 13px; margin: 0 0 22px; }
+.hero-kicker .rule { width: 40px; }
+.hero-kicker .rule-r { background: linear-gradient(90deg, var(--gold), transparent); }
+.hero-title { font-family: var(--serif); font-weight: 700; font-size: clamp(48px, 7.4vw, 94px); line-height: .98; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 6px 34px rgba(0,0,0,.55); }
+.hero-divider { width: 240px; max-width: 62%; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); margin: 28px 0; }
+.hero-subtitle { color: var(--gold); font-weight: 500; letter-spacing: 3.5px; text-transform: uppercase; font-size: 14.5px; line-height: 2; margin: 0 0 36px; }
 
 /* ---------- Secciones ---------- */
 .section { padding: 74px 0; }
@@ -276,9 +293,14 @@ h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 800; }
   .feature-grid { grid-template-columns: repeat(2, 1fr); gap: 22px 20px; }
 }
 @media (max-width: 820px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .hero-media { max-width: 420px; margin: 0 auto; order: -1; aspect-ratio: 16/10; }
   .modal-grid { grid-template-columns: 1fr; }
+  .hero { min-height: 74vh; }
+  .hero-bg { background-position: 64% center; }
+  .hero-scrim {
+    background:
+      linear-gradient(90deg, rgba(9,7,4,.95) 0%, rgba(9,7,4,.78) 46%, rgba(9,7,4,.4) 100%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 42%);
+  }
 }
 @media (max-width: 680px) {
   .cat-grid { grid-template-columns: 1fr; }
