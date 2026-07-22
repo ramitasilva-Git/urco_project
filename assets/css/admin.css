@@ -49,6 +49,8 @@
 .admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .admin-head h1 { font-family: var(--serif); font-size: 26px; letter-spacing: 2px; text-transform: uppercase; }
 .ar-name .ico { width: 18px; height: 18px; color: var(--gold); vertical-align: -3px; margin-right: 4px; }
+.cat-ico-box { width: 66px; height: 66px; border-radius: 5px; border: 1px solid var(--line); background: var(--bg-2); display: flex; align-items: center; justify-content: center; }
+.cat-ico-box .ico { width: 30px; height: 30px; color: var(--gold); stroke-width: 1.2; }
 
 /* Selector de íconos */
 .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }

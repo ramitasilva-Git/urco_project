@@ -46,12 +46,10 @@ function renderCategories() {
   CATS.forEach((c) => {
     grid.appendChild(el(`
       <a class="cat-card" href="#${c.slug}">
-        <img src="${c.image}" alt="${c.name}" loading="lazy" />
-        <div class="cat-overlay">
-          <div class="cat-ico"><svg class="ico" viewBox="0 0 24 24">${ICONS[c.icon] || ""}</svg></div>
-          <h3>${c.name}</h3>
-          <p>${c.blurb}</p>
-        </div>
+        <div class="cat-ico"><svg class="ico" viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.blade}</svg></div>
+        <h3>${c.name}</h3>
+        <p>${c.blurb || ""}</p>
+        <span class="cat-go">Ver productos <svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
       </a>`));
   });
 }
@@ -183,7 +181,7 @@ function openModal(p) {
   document.body.style.overflow = "hidden";
 }
 function closeModal() { modal.hidden = true; if ($("#drawer").hidden) document.body.style.overflow = ""; }
-modal.addEventListener("click", (e) => { if (e.target.hasAttribute("data-close")) closeModal(); });
+modal.addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeModal(); });
 
 /* ---------- Carrito ---------- */
 const drawer = $("#drawer");
@@ -246,7 +244,7 @@ function syncCart() {
 function openDrawer() { drawer.hidden = false; document.body.style.overflow = "hidden"; }
 function closeDrawer() { drawer.hidden = true; if (modal.hidden) document.body.style.overflow = ""; }
 $("#cart-btn").addEventListener("click", openDrawer);
-drawer.addEventListener("click", (e) => { if (e.target.hasAttribute("data-cart-close")) closeDrawer(); });
+drawer.addEventListener("click", (e) => { if (e.target.closest("[data-cart-close]")) closeDrawer(); });
 
 /* ---------- Buscador ---------- */
 let searchTimer;
@@ -255,10 +253,14 @@ $("#search").addEventListener("input", (e) => {
   searchTimer = setTimeout(() => renderCatalog(e.target.value), 120);
 });
 
-/* ---------- Menú móvil ---------- */
+/* ---------- Menú desplegable (categorías dinámicas) ---------- */
 const mnav = $("#mobile-nav");
+function renderNav() {
+  mnav.innerHTML = CATS.map((c) => `<a href="#${c.slug}">${c.name}</a>`).join("");
+}
 $("#menu-btn").addEventListener("click", () => mnav.classList.toggle("open"));
-$$("#mobile-nav a").forEach((a) => a.addEventListener("click", () => mnav.classList.remove("open")));
+// Delegación: sirve aunque los links se re-generen desde la base
+mnav.addEventListener("click", (e) => { if (e.target.closest("a")) mnav.classList.remove("open"); });
 
 /* ---------- Escape cierra ---------- */
 document.addEventListener("keydown", (e) => {
@@ -273,6 +275,7 @@ async function init() {
   renderFeatures();
   [CATS, CATALOG] = await Promise.all([loadCategories(), loadProducts()]);
   BY_SLUG = new Map(CATALOG.map((p) => [p.slug, p]));
+  renderNav();
   renderCategories();
   renderCatalog();
   syncCart();

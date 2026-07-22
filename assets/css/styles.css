@@ -155,19 +155,24 @@ h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 800; }
 
 /* ---------- Categorías ---------- */
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-.cat-card { position: relative; display: block; aspect-ratio: 3/4; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
-.cat-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .55s ease; }
-.cat-card:hover img { transform: scale(1.07); }
-.cat-card .cat-overlay {
-  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
-  padding: 26px; background: linear-gradient(0deg, rgba(8,6,3,.96) 8%, rgba(8,6,3,.35) 45%, transparent 75%);
+.cat-card {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+  padding: 40px 32px; min-height: 240px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(160deg, var(--panel) 0%, var(--bg-2) 100%);
+  border: 1px solid var(--line); transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
 }
-.cat-card .cat-ico { width: 40px; height: 40px; color: var(--gold); margin-bottom: 8px; }
-.cat-card .cat-ico .ico { width: 40px; height: 40px; stroke-width: 1.3; }
-.cat-card h3 { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: 2px; text-transform: uppercase; }
+.cat-card::before {
+  content: ""; position: absolute; top: -50px; right: -50px; width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(201,162,76,.16), transparent 70%); pointer-events: none;
+}
+.cat-card:hover { transform: translateY(-6px); border-color: rgba(201,162,76,.55); box-shadow: 0 26px 48px -30px rgba(0,0,0,.9); }
+.cat-card .cat-ico { width: 56px; height: 56px; color: var(--gold); }
+.cat-card .cat-ico .ico { width: 56px; height: 56px; stroke-width: 1.1; }
+.cat-card h3 { font-family: var(--serif); font-weight: 700; font-size: 27px; letter-spacing: 2px; text-transform: uppercase; }
 .cat-card p { color: var(--muted); font-size: 14px; margin: 0; }
-.cat-card::after { content: ""; position: absolute; inset: 0; border: 1px solid transparent; border-radius: 6px; transition: border-color .3s; }
-.cat-card:hover::after { border-color: rgba(201,162,76,.55); }
+.cat-card .cat-go { margin-top: auto; color: var(--gold); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+.cat-card .cat-go .ico { width: 15px; height: 15px; stroke-width: 2; transition: transform .25s; }
+.cat-card:hover .cat-go .ico { transform: translateX(4px); }
 
 /* ---------- Barra de garantías ---------- */
 .features { border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); background: rgba(22,18,12,.5); }

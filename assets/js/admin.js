@@ -146,9 +146,9 @@ async function loadCatList() {
     const row = document.createElement("div");
     row.className = "admin-row";
     row.innerHTML = `
-      <img src="${c.image || PLACEHOLDER}" alt="" />
+      <div class="cat-ico-box">${svg(c.icon)}</div>
       <div class="ar-main">
-        <div class="ar-name">${svg(c.icon)} ${esc(c.name)}</div>
+        <div class="ar-name">${esc(c.name)}</div>
         <div class="ar-meta">${esc(c.blurb || "")}</div>
       </div>
       <div class="ar-price"></div>
@@ -196,12 +196,6 @@ function openCatEditor(c) {
 
           <label class="fld"><span>Descripción corta</span><input id="c-blurb" value="${esc(data.blurb)}" placeholder="Ej: Para cada aventura." /></label>
 
-          <div class="fld">
-            <span>Imagen de la categoría</span>
-            <div id="c-imgs" class="img-manager">${data.image ? imgThumb(data.image) : ""}</div>
-            <input id="c-file" type="file" accept="image/*" />
-          </div>
-
           <p class="form-error" id="cat-error" hidden></p>
           <div class="form-actions">
             <button type="button" class="btn btn-ghost" data-x>Cancelar</button>
@@ -227,24 +221,17 @@ function openCatEditor(c) {
     });
   });
 
-  // Quitar imagen existente
-  bindImgRemovers(editor, "#c-imgs");
-
   editor.querySelector("#cat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const errBox = editor.querySelector("#cat-error");
     const saveBtn = editor.querySelector("#cat-save");
     errBox.hidden = true; saveBtn.disabled = true; saveBtn.textContent = "Guardando…";
     try {
-      const kept = [...editor.querySelectorAll("#c-imgs .img-item")].map((n) => n.dataset.url);
-      const file = editor.querySelector("#c-file").files[0];
-      const image = file ? await uploadImage(file) : (kept[0] || "");
       const name = editor.querySelector("#c-name").value.trim();
       const record = {
         name,
         icon: iconInput.value || "blade",
         blurb: editor.querySelector("#c-blurb").value.trim(),
-        image,
       };
       if (isNew) {
         record.slug = await uniqueSlug("categories", slugify(name) || "categoria");
@@ -258,7 +245,10 @@ function openCatEditor(c) {
       close();
       await loadAll();
     } catch (err) {
-      errBox.textContent = "No se pudo guardar: " + (err.message || err);
+      const msg = /categories/.test(err.message || "") && /schema cache|does not exist/.test(err.message || "")
+        ? "Falta crear la tabla de categorías: ejecutá db/categories.sql en el SQL Editor de Supabase."
+        : "No se pudo guardar: " + (err.message || err);
+      errBox.textContent = msg;
       errBox.hidden = false;
       saveBtn.disabled = false; saveBtn.textContent = isNew ? "Crear categoría" : "Guardar cambios";
     }
